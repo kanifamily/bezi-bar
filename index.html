@@ -169,8 +169,10 @@
   <footer>© VEGE BAR</footer>
 
   <script>
-    // Google Sheetsの「ウェブに公開」CSV URL
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
+    // Google Sheets設定
+    // 使うシートの1行目は category, name, price, description, image, soldout にしてください
+    const SHEET_ID = "1M6rDqZ4kmtsIbvMia8M88Sq2yaSWaIlEdg1C6QVjrqU";
+    const SHEET_GID = "0";
 
     function escapeHTML(value) {
       return String(value || "")
@@ -181,53 +183,12 @@
         .replaceAll("'", "&#039;");
     }
 
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let cell = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
-
-        if (char === '"' && inQuotes && nextChar === '"') {
-          cell += '"';
-          i++;
-        } else if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          row.push(cell.trim());
-          cell = "";
-        } else if ((char === "
-" || char === "") && !inQuotes) {
-          if (cell || row.length) {
-            row.push(cell.trim());
-            rows.push(row);
-            row = [];
-            cell = "";
-          }
-          if (char === "" && nextChar === "
-") i++;
-        } else {
-          cell += char;
-        }
-      }
-
-      if (cell || row.length) {
-        row.push(cell.trim());
-        rows.push(row);
-      }
-
-      return rows;
-    }
-
     function renderMenu(items) {
       const menuArea = document.getElementById("menuArea");
       menuArea.innerHTML = "";
 
       if (!items.length) {
-        menuArea.innerHTML = '<p class="error">メニューがまだ登録されていません。</p>';
+        menuArea.innerHTML = '<p class="error">メニューがまだ登録されていません。Google Sheetsの1行目と内容を確認してください。</p>';
         return;
       }
 
@@ -267,33 +228,37 @@
       });
     }
 
-    async function loadMenu() {
-      const menuArea = document.getElementById("menuArea");
-
+    // Google SheetsのJSONP読み込み後に呼ばれる関数
+    window.googleSheetCallback = function(data) {
       try {
-        const response = await fetch(SHEET_CSV_URL + "&cache=" + Date.now());
-        if (!response.ok) throw new Error("CSVを取得できませんでした");
+        const cols = data.table.cols.map(col => (col.label || "").trim().toLowerCase());
+        const rows = data.table.rows || [];
 
-        const text = await response.text();
-        const rows = parseCSV(text).filter(row => row.some(cell => cell));
-        const headers = rows[0].map(header => header.trim().toLowerCase());
-
-        const items = rows.slice(1).map(row => {
+        const items = rows.map(row => {
           const item = {};
-          headers.forEach((header, index) => {
-            item[header] = row[index] || "";
+          cols.forEach((header, index) => {
+            item[header] = row.c[index] && row.c[index].v != null ? row.c[index].v : "";
           });
           return item;
         }).filter(item => item.name);
 
         renderMenu(items);
       } catch (error) {
-        menuArea.innerHTML = '<p class="error">メニューを読み込めませんでした。Google Sheetsの公開設定とCSV URLを確認してください。</p>';
+        document.getElementById("menuArea").innerHTML = '<p class="error">メニューの読み込みに失敗しました。1行目の列名を確認してください。</p>';
         console.error(error);
       }
+    };
+
+    function loadMenuFromGoogleSheets() {
+      const script = document.createElement("script");
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:googleSheetCallback&gid=${SHEET_GID}&cache=${Date.now()}`;
+      script.onerror = function() {
+        document.getElementById("menuArea").innerHTML = '<p class="error">Google Sheetsを読み込めませんでした。シートの共有設定を「リンクを知っている全員が閲覧可」にしてください。</p>';
+      };
+      document.body.appendChild(script);
     }
 
-    loadMenu();
+    loadMenuFromGoogleSheets();
   </script>
 </body>
 </html>
