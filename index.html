@@ -12,16 +12,16 @@
     }
 
     body {
-      font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
       background: #f4efe6;
       color: #2d2a26;
       line-height: 1.8;
     }
 
     .hero {
-      height: 60vh;
+      min-height: 58vh;
       background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
-        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1600&auto=format&fit=crop');
+        url("https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1600&auto=format&fit=crop");
       background-size: cover;
       background-position: center;
       display: flex;
@@ -29,135 +29,157 @@
       justify-content: center;
       text-align: center;
       color: white;
-      padding: 20px;
+      padding: 24px;
     }
 
-    .hero-content h1 {
-      font-size: 4rem;
-      letter-spacing: 4px;
-      margin-bottom: 10px;
+    .hero h1 {
+      font-size: clamp(2.6rem, 8vw, 5rem);
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
     }
 
-    .hero-content p {
-      font-size: 1.1rem;
-      opacity: 0.9;
+    .hero p {
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      opacity: 0.92;
     }
 
     .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 60px 20px;
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 56px 20px;
+    }
+
+    .lead {
+      text-align: center;
+      margin-bottom: 48px;
+      font-size: 1.05rem;
+      color: #4b453d;
     }
 
     .section-title {
-      font-size: 2rem;
-      margin-bottom: 30px;
-      border-left: 4px solid #556b4f;
-      padding-left: 15px;
+      font-size: 1.8rem;
+      margin: 44px 0 24px;
+      border-left: 5px solid #556b4f;
+      padding-left: 14px;
       color: #3e4d38;
     }
 
     .menu-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      margin-bottom: 60px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
     }
 
     .menu-card {
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.75);
       border-radius: 18px;
-      padding: 25px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      backdrop-filter: blur(4px);
-      transition: transform 0.2s ease;
+      padding: 22px;
+      box-shadow: 0 5px 22px rgba(0,0,0,0.07);
+      overflow: hidden;
     }
 
-    .menu-card:hover {
-      transform: translateY(-4px);
+    .menu-card img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 15px;
+      background: #e6dccd;
     }
 
     .menu-card h3 {
-      font-size: 1.3rem;
-      margin-bottom: 10px;
+      font-size: 1.28rem;
       color: #2f3b2a;
+      margin-bottom: 6px;
     }
 
     .price {
-      color: #6f7f67;
+      color: #66745d;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+    }
+
+    .soldout {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #d8c8b0;
+      color: #5a4632;
+      font-size: 0.85rem;
     }
 
     .concept {
       background: #e8dfd0;
-      border-radius: 20px;
-      padding: 40px;
+      border-radius: 22px;
+      padding: 36px 24px;
       text-align: center;
-      margin-top: 30px;
+      margin-top: 56px;
     }
 
     .concept h2 {
-      margin-bottom: 20px;
       color: #3e4d38;
+      margin-bottom: 16px;
+    }
+
+    .error {
+      background: #fff7ef;
+      border: 1px solid #d9bfa5;
+      padding: 18px;
+      border-radius: 14px;
+      color: #5d3b22;
     }
 
     footer {
       text-align: center;
-      padding: 30px;
+      padding: 28px;
       color: #777;
       font-size: 0.9rem;
-    }
-
-    @media (max-width: 768px) {
-      .hero-content h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero {
-        height: 50vh;
-      }
     }
   </style>
 </head>
 <body>
 
   <section class="hero">
-    <div class="hero-content">
+    <div>
       <h1>VEGE BAR</h1>
       <p>Herb & Mocktail / Kominka Home Bar</p>
     </div>
   </section>
 
-  <div class="container">
-
-    <h2 class="section-title">Menu</h2>
+  <main class="container">
+    <p class="lead">
+      古民家の静かな空間で、野菜とハーブを楽しむ小さなホームバー。
+    </p>
 
     <div id="menuArea">
       <p>メニューを読み込み中...</p>
     </div>
 
-    <div class="concept">
+    <section class="concept">
       <h2>Concept</h2>
       <p>
-        古民家の静かな空間で、
-        自家栽培ハーブを使った一杯を。
-        <br><br>
-        季節によってメニューが変わる、
-        小さなホームバーです。
+        自家栽培ハーブや季節の野菜を使った、やさしい一杯と小さなおつまみ。<br>
+        季節によってメニューが少しずつ変わります。
       </p>
-    </div>
+    </section>
+  </main>
 
-  </div>
-
-  <footer>
-    © VEGE BAR
-  </footer>
+  <footer>© VEGE BAR</footer>
 
   <script>
-    // Google Sheets CSV URL
-    // シートの列名は category, name, price, description, image, soldout にしてください
+    // Google Sheetsの「ウェブに公開」CSV URL
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
+
+    function escapeHTML(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
     function parseCSV(text) {
       const rows = [];
@@ -177,18 +199,16 @@
         } else if (char === ',' && !inQuotes) {
           row.push(cell.trim());
           cell = "";
-        } else if ((char === '
-' || char === '
-') && !inQuotes) {
+        } else if ((char === "
+" || char === "") && !inQuotes) {
           if (cell || row.length) {
             row.push(cell.trim());
             rows.push(row);
             row = [];
             cell = "";
           }
-          if (char === '
-' && nextChar === '
-') i++;
+          if (char === "" && nextChar === "
+") i++;
         } else {
           cell += char;
         }
@@ -206,6 +226,11 @@
       const menuArea = document.getElementById("menuArea");
       menuArea.innerHTML = "";
 
+      if (!items.length) {
+        menuArea.innerHTML = '<p class="error">メニューがまだ登録されていません。</p>';
+        return;
+      }
+
       const categories = [...new Set(items.map(item => item.category || "Menu"))];
 
       categories.forEach(category => {
@@ -220,25 +245,21 @@
         items
           .filter(item => (item.category || "Menu") === category)
           .forEach(item => {
-            const card = document.createElement("div");
+            const name = escapeHTML(item.name);
+            const price = escapeHTML(item.price);
+            const description = escapeHTML(item.description);
+            const image = escapeHTML(item.image);
+            const soldout = String(item.soldout || "").toUpperCase() === "TRUE";
+
+            const card = document.createElement("article");
             card.className = "menu-card";
-
-            const imageHtml = item.image
-              ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">`
-              : "";
-
-            const soldoutHtml = item.soldout && item.soldout.toUpperCase() === "TRUE"
-              ? `<div style="display:inline-block; margin-bottom:10px; padding:3px 10px; border-radius:999px; background:#d8c8b0; color:#5a4632; font-size:0.85rem;">Sold Out</div>`
-              : "";
-
             card.innerHTML = `
-              ${imageHtml}
-              ${soldoutHtml}
-              <h3>${item.name || ""}</h3>
-              <div class="price">${item.price || ""}</div>
-              <p>${item.description || ""}</p>
+              ${image ? `<img src="${image}" alt="${name}">` : ""}
+              ${soldout ? `<span class="soldout">Sold Out</span>` : ""}
+              <h3>${name}</h3>
+              <div class="price">${price}</div>
+              <p>${description}</p>
             `;
-
             grid.appendChild(card);
           });
 
@@ -247,25 +268,27 @@
     }
 
     async function loadMenu() {
+      const menuArea = document.getElementById("menuArea");
+
       try {
-        const response = await fetch(SHEET_CSV_URL);
+        const response = await fetch(SHEET_CSV_URL + "&cache=" + Date.now());
+        if (!response.ok) throw new Error("CSVを取得できませんでした");
+
         const text = await response.text();
-        const rows = parseCSV(text);
+        const rows = parseCSV(text).filter(row => row.some(cell => cell));
         const headers = rows[0].map(header => header.trim().toLowerCase());
 
-        const items = rows.slice(1)
-          .filter(row => row.some(cell => cell))
-          .map(row => {
-            const item = {};
-            headers.forEach((header, index) => {
-              item[header] = row[index] || "";
-            });
-            return item;
+        const items = rows.slice(1).map(row => {
+          const item = {};
+          headers.forEach((header, index) => {
+            item[header] = row[index] || "";
           });
+          return item;
+        }).filter(item => item.name);
 
         renderMenu(items);
       } catch (error) {
-        document.getElementById("menuArea").innerHTML = "<p>メニューを読み込めませんでした。Google Sheetsの公開設定を確認してください。</p>";
+        menuArea.innerHTML = '<p class="error">メニューを読み込めませんでした。Google Sheetsの公開設定とCSV URLを確認してください。</p>';
         console.error(error);
       }
     }
