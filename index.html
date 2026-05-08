@@ -169,18 +169,46 @@
   <footer>© VEGE BAR</footer>
 
   <script>
-    // Google Sheets設定
-    // 使うシートの1行目は category, name, price, description, image, soldout にしてください
-    const SHEET_ID = "1M6rDqZ4kmtsIbvMia8M88Sq2yaSWaIlEdg1C6QVjrqU";
+    // Google Sheetsの公開CSV URL
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
 
-    function escapeHTML(value) {
-      return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (cell || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = "";
+          }
+          if (char === "\r" && next === "\n") i++;
+        } else {
+          cell += char;
+        }
+      }
+
+      if (cell || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+
+      return rows;
     }
 
     function renderMenu(items) {
@@ -188,7 +216,7 @@
       menuArea.innerHTML = "";
 
       if (!items.length) {
-        menuArea.innerHTML = '<p class="error">メニューがまだ登録されていません。Google Sheetsの1行目と内容を確認してください。</p>';
+        menuArea.innerHTML = '<p class="error">メニューが登録されていません。</p>';
         return;
       }
 
@@ -206,21 +234,17 @@
         items
           .filter(item => (item.category || "Menu") === category)
           .forEach(item => {
-            const name = escapeHTML(item.name);
-            const price = escapeHTML(item.price);
-            const description = escapeHTML(item.description);
-            const image = escapeHTML(item.image);
-            const soldout = String(item.soldout || "").toUpperCase() === "TRUE";
-
             const card = document.createElement("article");
             card.className = "menu-card";
+
             card.innerHTML = `
-              ${image ? `<img src="${image}" alt="${name}">` : ""}
-              ${soldout ? `<span class="soldout">Sold Out</span>` : ""}
-              <h3>${name}</h3>
-              <div class="price">${price}</div>
-              <p>${description}</p>
+              ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ""}
+              ${item.soldout && item.soldout.toUpperCase() === "TRUE" ? `<span class="soldout">Sold Out</span>` : ""}
+              <h3>${item.name}</h3>
+              <div class="price">${item.price}</div>
+              <p>${item.description}</p>
             `;
+
             grid.appendChild(card);
           });
 
@@ -228,45 +252,32 @@
       });
     }
 
-    // Google SheetsのJSONP読み込み後に呼ばれる関数
-    window.googleSheetCallback = function(data) {
+    async function loadMenu() {
+      const menuArea = document.getElementById("menuArea");
+
       try {
-        const rows = data.table.rows || [];
+        const response = await fetch(SHEET_URL + "&cache=" + Date.now());
+        const text = await response.text();
+        const rows = parseCSV(text).filter(row => row.length > 1);
 
-        // Google Sheets側が1行目を「列名」として認識しない場合があるため、
-        // まず固定の列順で読み込みます。
-        // A: category / B: name / C: price / D: description / E: image / F: soldout
-        const fixedHeaders = ["category", "name", "price", "description", "image", "soldout"];
-
-        const items = rows.map(row => {
-          const item = {};
-          fixedHeaders.forEach((header, index) => {
-            item[header] = row.c[index] && row.c[index].v != null ? row.c[index].v : "";
-          });
-          return item;
-        })
-        // 1行目が category,name,price... の見出しなら除外
-        .filter(item => String(item.name).toLowerCase() !== "name")
-        // 商品名がある行だけ表示
-        .filter(item => item.name);
+        // 1行目は見出しとして無視。A〜F列を固定で読みます。
+        const items = rows.slice(1).map(row => ({
+          category: row[0] || "Menu",
+          name: row[1] || "",
+          price: row[2] || "",
+          description: row[3] || "",
+          image: row[4] || "",
+          soldout: row[5] || ""
+        })).filter(item => item.name);
 
         renderMenu(items);
       } catch (error) {
-        document.getElementById("menuArea").innerHTML = '<p class="error">メニューの読み込みに失敗しました。Google SheetsのA列〜F列に category, name, price, description, image, soldout の順で入力してください。</p>';
+        menuArea.innerHTML = '<p class="error">Google Sheetsの読み込みに失敗しました。</p>';
         console.error(error);
       }
-    };
-
-    function loadMenuFromGoogleSheets() {
-      const script = document.createElement("script");
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:googleSheetCallback&gid=${SHEET_GID}&cache=${Date.now()}`;
-      script.onerror = function() {
-        document.getElementById("menuArea").innerHTML = '<p class="error">Google Sheetsを読み込めませんでした。シートの共有設定を「リンクを知っている全員が閲覧可」にしてください。</p>';
-      };
-      document.body.appendChild(script);
     }
 
-    loadMenuFromGoogleSheets();
+    loadMenu();
   </script>
 </body>
 </html>
