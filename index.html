@@ -231,20 +231,28 @@
     // Google SheetsのJSONP読み込み後に呼ばれる関数
     window.googleSheetCallback = function(data) {
       try {
-        const cols = data.table.cols.map(col => (col.label || "").trim().toLowerCase());
         const rows = data.table.rows || [];
+
+        // Google Sheets側が1行目を「列名」として認識しない場合があるため、
+        // まず固定の列順で読み込みます。
+        // A: category / B: name / C: price / D: description / E: image / F: soldout
+        const fixedHeaders = ["category", "name", "price", "description", "image", "soldout"];
 
         const items = rows.map(row => {
           const item = {};
-          cols.forEach((header, index) => {
+          fixedHeaders.forEach((header, index) => {
             item[header] = row.c[index] && row.c[index].v != null ? row.c[index].v : "";
           });
           return item;
-        }).filter(item => item.name);
+        })
+        // 1行目が category,name,price... の見出しなら除外
+        .filter(item => String(item.name).toLowerCase() !== "name")
+        // 商品名がある行だけ表示
+        .filter(item => item.name);
 
         renderMenu(items);
       } catch (error) {
-        document.getElementById("menuArea").innerHTML = '<p class="error">メニューの読み込みに失敗しました。1行目の列名を確認してください。</p>';
+        document.getElementById("menuArea").innerHTML = '<p class="error">メニューの読み込みに失敗しました。Google SheetsのA列〜F列に category, name, price, description, image, soldout の順で入力してください。</p>';
         console.error(error);
       }
     };
