@@ -157,7 +157,7 @@
   <script>
     // Google Sheets CSV URL
     // シートの列名は category, name, price, description, image, soldout にしてください
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1M6rDqZ4kmtsIbvMia8M88Sq2yaSWaIlEdg1C6QVjrqU/export?format=csv&gid=0";
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
 
     function parseCSV(text) {
       const rows = [];
@@ -178,14 +178,16 @@
           row.push(cell.trim());
           cell = "";
         } else if ((char === '
-' || char === '') && !inQuotes) {
+' || char === '
+') && !inQuotes) {
           if (cell || row.length) {
             row.push(cell.trim());
             rows.push(row);
             row = [];
             cell = "";
           }
-          if (char === '' && nextChar === '
+          if (char === '
+' && nextChar === '
 ') i++;
         } else {
           cell += char;
