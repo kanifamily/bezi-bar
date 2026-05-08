@@ -131,80 +131,10 @@
 
   <div class="container">
 
-    <h2 class="section-title">Signature Drinks</h2>
+    <h2 class="section-title">Menu</h2>
 
-    <div class="menu-grid">
-
-      <div class="menu-card">
-        <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1200&auto=format&fit=crop" alt="Rosemary Tonic" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">
-        <h3>Rosemary Tonic</h3>
-        <div class="price">¥700</div>
-        <p>
-          庭で育てたローズマリーを使った、
-          香りを楽しむ爽やかなトニック。
-        </p>
-      </div>
-
-      <div class="menu-card">
-        <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1200&auto=format&fit=crop" alt="Lavender Lemonade" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">
-        <h3>Lavender Lemonade</h3>
-        <div class="price">¥750</div>
-        <p>
-          ラベンダーがほんのり香る、
-          やさしいレモネード。
-        </p>
-      </div>
-
-      <div class="menu-card">
-        <img src="https://images.unsplash.com/photo-1499638673689-79a0b5115d87?q=80&w=1200&auto=format&fit=crop" alt="Lemongrass Soda" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">
-        <h3>Lemongrass Soda</h3>
-        <div class="price">¥700</div>
-        <p>
-          レモングラスの香りと炭酸の
-          すっきりした後味。
-        </p>
-      </div>
-
-      <div class="menu-card">
-        <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?q=80&w=1200&auto=format&fit=crop" alt="Sage Smoke Soda" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">
-        <h3>Sage Smoke Soda</h3>
-        <div class="price">¥800</div>
-        <p>
-          セージを軽く燻して香りを移した、
-          落ち着いた大人向けソーダ。
-        </p>
-      </div>
-
-    </div>
-
-    <h2 class="section-title">Food</h2>
-
-    <div class="menu-grid">
-
-      <div class="menu-card">
-        <h3>Homemade Pickles</h3>
-        <div class="price">¥500</div>
-        <p>
-          季節野菜の自家製ピクルス。
-        </p>
-      </div>
-
-      <div class="menu-card">
-        <h3>Smoked Nuts</h3>
-        <div class="price">¥450</div>
-        <p>
-          軽く燻したミックスナッツ。
-        </p>
-      </div>
-
-      <div class="menu-card">
-        <h3>Cheese Plate</h3>
-        <div class="price">¥700</div>
-        <p>
-          ソーダにも合うチーズ盛り。
-        </p>
-      </div>
-
+    <div id="menuArea">
+      <p>メニューを読み込み中...</p>
     </div>
 
     <div class="concept">
@@ -224,5 +154,121 @@
     © VEGE BAR
   </footer>
 
+  <script>
+    // Google Sheets CSV URL
+    // シートの列名は category, name, price, description, image, soldout にしてください
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1M6rDqZ4kmtsIbvMia8M88Sq2yaSWaIlEdg1C6QVjrqU/export?format=csv&gid=0";
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"' && inQuotes && nextChar === '"') {
+          cell += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          row.push(cell.trim());
+          cell = "";
+        } else if ((char === '
+' || char === '') && !inQuotes) {
+          if (cell || row.length) {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = "";
+          }
+          if (char === '' && nextChar === '
+') i++;
+        } else {
+          cell += char;
+        }
+      }
+
+      if (cell || row.length) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+
+      return rows;
+    }
+
+    function renderMenu(items) {
+      const menuArea = document.getElementById("menuArea");
+      menuArea.innerHTML = "";
+
+      const categories = [...new Set(items.map(item => item.category || "Menu"))];
+
+      categories.forEach(category => {
+        const title = document.createElement("h2");
+        title.className = "section-title";
+        title.textContent = category;
+        menuArea.appendChild(title);
+
+        const grid = document.createElement("div");
+        grid.className = "menu-grid";
+
+        items
+          .filter(item => (item.category || "Menu") === category)
+          .forEach(item => {
+            const card = document.createElement("div");
+            card.className = "menu-card";
+
+            const imageHtml = item.image
+              ? `<img src="${item.image}" alt="${item.name}" style="width:100%; height:220px; object-fit:cover; border-radius:14px; margin-bottom:15px;">`
+              : "";
+
+            const soldoutHtml = item.soldout && item.soldout.toUpperCase() === "TRUE"
+              ? `<div style="display:inline-block; margin-bottom:10px; padding:3px 10px; border-radius:999px; background:#d8c8b0; color:#5a4632; font-size:0.85rem;">Sold Out</div>`
+              : "";
+
+            card.innerHTML = `
+              ${imageHtml}
+              ${soldoutHtml}
+              <h3>${item.name || ""}</h3>
+              <div class="price">${item.price || ""}</div>
+              <p>${item.description || ""}</p>
+            `;
+
+            grid.appendChild(card);
+          });
+
+        menuArea.appendChild(grid);
+      });
+    }
+
+    async function loadMenu() {
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        const text = await response.text();
+        const rows = parseCSV(text);
+        const headers = rows[0].map(header => header.trim().toLowerCase());
+
+        const items = rows.slice(1)
+          .filter(row => row.some(cell => cell))
+          .map(row => {
+            const item = {};
+            headers.forEach((header, index) => {
+              item[header] = row[index] || "";
+            });
+            return item;
+          });
+
+        renderMenu(items);
+      } catch (error) {
+        document.getElementById("menuArea").innerHTML = "<p>メニューを読み込めませんでした。Google Sheetsの公開設定を確認してください。</p>";
+        console.error(error);
+      }
+    }
+
+    loadMenu();
+  </script>
 </body>
 </html>
