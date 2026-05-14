@@ -240,226 +240,35 @@
 
   <footer>© VEGE BAR</footer>
 
-  <script>
-    /* ==============================
-      VEGE BAR - App Settings
-      今後変える場所は基本ここだけ
-    ============================== */
-    var APP = {
-      sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv",
-      // Google Sheetsの列順
-      columns: ["category", "name", "price", "description", "image", "soldout"],
-      // 表示したいカテゴリ順。シートに無いカテゴリは無視されます。
-      categoryOrder: ["Mocktail", "Alcohol", "Food", "Coffee & Tea", "Seasonal", "Menu"],
-      // シートが一時的に読めない時に出す仮メニュー
-      fallbackMenu: [
-        { category: "Mocktail", name: "Rosemary Tonic", price: "¥700", description: "ローズマリー香る爽やかなハーブトニック", image: "", soldout: "FALSE" },
-        { category: "Mocktail", name: "Lavender Lemonade", price: "¥750", description: "ラベンダーがほんのり香るレモネード", image: "", soldout: "FALSE" },
-        { category: "Mocktail", name: "Lemongrass Soda", price: "¥700", description: "レモングラスのすっきりソーダ", image: "", soldout: "FALSE" },
-        { category: "Alcohol", name: "Gin & Tonic", price: "¥700", description: "すっきり香る定番の一杯", image: "", soldout: "FALSE" },
-        { category: "Food", name: "Homemade Pickles", price: "¥500", description: "季節野菜の自家製ピクルス", image: "", soldout: "FALSE" }
-      ]
-    };
+ <script>
+const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
 
-    /* ==============================
-      Utility
-    ============================== */
-    function escapeHTML(value) {
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+fetch(URL)
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.split("\n").map(r => r.split(","));
+    const menuArea = document.getElementById("menuArea");
 
-    function normalize(value) {
-      return String(value || "").trim();
-    }
+    let html = "";
 
-    function isSoldOut(value) {
-      var text = normalize(value).toUpperCase();
-      return text === "TRUE" || text === "YES" || text === "売り切れ" || text === "SOLD OUT";
-    }
+    rows.slice(1).forEach(r => {
+      if (!r[1]) return;
 
-    /* ==============================
-      CSV Parser
-      カンマ・改行・説明文内のカンマにも対応
-    ============================== */
-    function parseCSV(text) {
-      var rows = [];
-      var row = [];
-      var cell = "";
-      var inQuotes = false;
+      html += `
+        <div class="menu-card">
+          ${r[4] ? `<img src="${r[4]}">` : ""}
+          <h3>${r[1]}</h3>
+          <div class="price">${r[2]}</div>
+          <p>${r[3]}</p>
+        </div>
+      `;
+    });
 
-      for (var i = 0; i < text.length; i++) {
-        var char = text[i];
-        var next = text[i + 1];
-
-        if (char === '"' && inQuotes && next === '"') {
-          cell += '"';
-          i++;
-        } else if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          row.push(cell.trim());
-          cell = "";
-        } else if ((char === "
-" || char === "
-") && !inQuotes) {
-          if (cell || row.length) {
-            row.push(cell.trim());
-            rows.push(row);
-            row = [];
-            cell = "";
-          }
-          if (char === "
-" && next === "
-") i++;
-        } else {
-          cell += char;
-        }
-      }
-
-      if (cell || row.length) {
-        row.push(cell.trim());
-        rows.push(row);
-      }
-
-      return rows;
-    }
-
-    function rowsToItems(rows) {
-      // 1行目は見出しとしてスキップ。A〜F列を固定で読む。
-      return rows.slice(1).map(function(row) {
-        return {
-          category: normalize(row[0]) || "Menu",
-          name: normalize(row[1]),
-          price: normalize(row[2]),
-          description: normalize(row[3]),
-          image: normalize(row[4]),
-          soldout: normalize(row[5])
-        };
-      }).filter(function(item) {
-        return item.name;
-      });
-    }
-
-    function sortCategories(categories) {
-      return categories.sort(function(a, b) {
-        var ai = APP.categoryOrder.indexOf(a);
-        var bi = APP.categoryOrder.indexOf(b);
-        if (ai === -1) ai = 999;
-        if (bi === -1) bi = 999;
-        return ai - bi;
-      });
-    }
-
-    /* ==============================
-      Render
-    ============================== */
-    function createMenuCard(item) {
-      var card = document.createElement("article");
-      card.className = "menu-card";
-
-      var html = "";
-
-      if (item.image) {
-        html += '<img src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.name) + '">';
-      }
-
-      if (isSoldOut(item.soldout)) {
-        html += '<span class="badge">Sold Out</span>';
-      }
-
-      html += '<h3>' + escapeHTML(item.name) + '</h3>';
-
-      if (item.price) {
-        html += '<div class="price">' + escapeHTML(item.price) + '</div>';
-      }
-
-      if (item.description) {
-        html += '<p>' + escapeHTML(item.description) + '</p>';
-      }
-
-      card.innerHTML = html;
-      return card;
-    }
-
-    function renderMenu(items, message) {
-      var menuArea = document.getElementById("menuArea");
-      menuArea.innerHTML = "";
-
-      if (message) {
-        var notice = document.createElement("p");
-        notice.className = "notice";
-        notice.textContent = message;
-        menuArea.appendChild(notice);
-      }
-
-      if (!items.length) {
-        menuArea.innerHTML = '<p class="notice">メニューが登録されていません。</p>';
-        return;
-      }
-
-      var categories = [];
-      items.forEach(function(item) {
-        var category = item.category || "Menu";
-        if (categories.indexOf(category) === -1) categories.push(category);
-      });
-
-      categories = sortCategories(categories);
-
-      categories.forEach(function(category) {
-        var title = document.createElement("h2");
-        title.className = "section-title";
-        title.textContent = category;
-        menuArea.appendChild(title);
-
-        var grid = document.createElement("div");
-        grid.className = "menu-grid";
-
-        items.filter(function(item) {
-          return (item.category || "Menu") === category;
-        }).forEach(function(item) {
-          grid.appendChild(createMenuCard(item));
-        });
-
-        menuArea.appendChild(grid);
-      });
-    }
-
-    /* ==============================
-      Data Load
-    ============================== */
-    function loadMenu() {
-      var menuArea = document.getElementById("menuArea");
-      menuArea.innerHTML = '<p class="notice">メニューを読み込み中...</p>';
-
-      fetch(APP.sheetCsvUrl + "&cache=" + new Date().getTime())
-        .then(function(response) {
-          if (!response.ok) throw new Error("CSV取得失敗");
-          return response.text();
-        })
-        .then(function(text) {
-          var rows = parseCSV(text).filter(function(row) {
-            return row.some(function(cell) { return normalize(cell); });
-          });
-
-          var items = rowsToItems(rows);
-          renderMenu(items);
-        })
-        .catch(function(error) {
-          console.error(error);
-          renderMenu(APP.fallbackMenu, "Google Sheetsを読み込めなかったため、仮メニューを表示しています。");
-        });
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", loadMenu);
-    } else {
-      loadMenu();
-    }
-  </script>
-</body>
+    menuArea.innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("menuArea").innerHTML = "読み込み失敗";
+    console.error(err);
+  });
+</script>
 </html>
