@@ -246,7 +246,7 @@
 
   <footer>© VEGE BAR</footer>
 
- <script>
+<script>
 const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsGipFr-I8zMWImTHyEb2aUYPdxNB9ZcOEAuvn-Cfsabfzh57oYAGEXitjQW64QhgPIyYuH9ZwsGfu/pub?output=csv";
 
 fetch(URL)
@@ -255,19 +255,31 @@ fetch(URL)
     const rows = text.split("\n").map(r => r.split(","));
     const menuArea = document.getElementById("menuArea");
 
-    let html = "";
+    let categories = {};
 
     rows.slice(1).forEach(r => {
       if (!r[1]) return;
 
-      html += `
+      const category = r[0] || "Menu";
+
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+
+      categories[category].push(`
         <div class="menu-card">
           ${r[4] ? `<img src="${r[4]}">` : ""}
-          <h3>${r[1]}</h3>
-          <div class="price">${r[2]}</div>
+          <h3>${r[1]} <span class="price">${r[2]}</span></h3>
           <p>${r[3]}</p>
         </div>
-      `;
+      `);
+    });
+
+    let html = "";
+
+    Object.keys(categories).forEach(cat => {
+      html += `<h2 class="section-title">${cat}</h2>`;
+      html += `<div class="menu-grid">${categories[cat].join("")}</div>`;
     });
 
     menuArea.innerHTML = html;
