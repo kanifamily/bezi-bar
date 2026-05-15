@@ -203,11 +203,16 @@
 
       .menu-card {
         padding: 18px;
+        overflow: hidden;
       }
 
-      .menu-card img {
-        height: 200px;
-      }
+     .menu-card img {
+  width: 100%;
+  height: 200px;      /* 高さ固定 */
+  object-fit: cover;  /* トリミングして埋める */
+  border-radius: 12px;
+  filter: brightness(0.95) contrast(1.05);
+}
     }
   </style>
 </head>
