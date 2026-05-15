@@ -94,16 +94,20 @@
       gap: 26px;
     }
 
-    .menu-card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: 0 12px 32px var(--shadow);
-      overflow: hidden;
-      backdrop-filter: blur(6px);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
+   .menu-card {
+  padding: 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  justify-content: space-between;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;   /* ←要素の間隔を自動で整える */
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
 
     .menu-card:hover {
       transform: translateY(-3px);
@@ -112,33 +116,30 @@
     }
 
     .menu-card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 15px;
-      margin-bottom: 16px;
-      background: var(--bg-soft);
-      filter: saturate(0.95) contrast(1.05);
-    }
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
 
     .menu-card h3 {
-      font-size: 1.28rem;
-      color: #fff7e8;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
 
-    .price {
-      color: var(--accent-soft);
-      font-weight: bold;
-      margin-bottom: 10px;
-      letter-spacing: 0.04em;
-    }
+   .price {
+  font-size: 0.95rem;
+  color: #a9bd86;
+  font-weight: bold;
+}
 
-    .menu-card p {
-      color: #d8cfc0;
-      font-size: 0.96rem;
-    }
+   .menu-card p {
+  font-size: 0.9rem;
+  color: #d0c7b8;
+  line-height: 1.6;
+}
 
     .badge {
       display: inline-block;
